@@ -67,7 +67,8 @@ def decode_arist(text,key):
 def extract_characters(string: str):
     string=string.lower()
     string=re.sub('\n',' ',string)
-    string=re.sub(' ',' ',string)
+    string=re.sub('   ',' ',string)
+    string=re.sub('  ',' ',string)
     lettersList = re.findall('[a-z]|\ ', string)
     string = ''.join(lettersList)
     return string
@@ -75,13 +76,14 @@ def extract_characters(string: str):
 
 #define method which finds frequency of each letter
 def freq_array(string):
-    string=string.lower()
+    stringLow=str(string)
+    stringLow.lower()
     numberOfEach=[]
     for i in range (26):
         currentLetter=chr(97+i)
-        numLetter = len(re.findall(currentLetter, string))
+        numLetter = len(re.findall(currentLetter, stringLow))
         numberOfEach.append(numLetter)
-    numSpace = len(re.findall(' ', string))
+    numSpace = len(re.findall(' ', stringLow))
     numberOfEach.append(numSpace)
     return numberOfEach
 
@@ -118,8 +120,6 @@ def get_pairs_array(ciphertext,pseudo=0):
     pairsList[i].append(numPair)
     return pairsList
 
-#calculate the likelihood of a certain shift given a ciphertext
-
 def calc_likelihood(ciphertext, key,probabilities):
     plaintext=decode_shift(ciphertext, key)
     freqArray=freq_array(plaintext)
@@ -138,14 +138,14 @@ def calc_log_likelihood(ciphertext, key,probabilities):
         logsum=logsum+freqArray[i]*log(probabilities[i])
     return logsum
 
-#test each shift and use relative liklihoods to find the most likely shift for a given ciphertext
-def most_likely_key(ciphertext):
+'''#test each shift and use relative liklihoods to find the most likely shift for a given ciphertext
+def most_likely_key(ciphertext,probabilities):
     liklihoodList=[]
     for i in range (27):
         l=calc_log_likelihood(ciphertext,i)
         liklihoodList.append(l)
     maxval=max(liklihoodList)
-    return liklihoodList.index(maxval) 
+    return liklihoodList.index(maxval) '''
 
 #use the most likely key to decode the ciphertext 
 def most_likely_plaintext(ciphertext):
@@ -162,31 +162,29 @@ def calc_liklihood_arist_key(ciphertext, key,probabilities):
 
 def rank_occurrence(ciphertext):
     freqArray=freq_array(ciphertext)
-    rankCipher=[]
-    for i in range (len(freqArray)):
-        maxi=freqArray.index(max(freqArray))
-        rankCipher.append(maxi)
-        freqArray[maxi]=-1
-    return rankCipher
+    return rank_occurrence_of_list(freqArray)
 
+def rank_occurrence_of_list(freqArray):
+    tempfA=list(freqArray)
+    tempfA.pop(26)
+    rankCipher=[]
+    for i in range (len(tempfA)):
+        maxindex=tempfA.index(max(tempfA))
+        rankCipher.append(maxindex)
+        tempfA[maxindex]=-1
+    return rankCipher
 #substitutes letters based on relative frequency from crime and punishment
 
-def substitute_singles_key(ciphertext, avfreq):
+def substitute_singles_key(ciphertext, probabilities):
     ciphertext=extract_characters(ciphertext)
-    cipher=rank_occurrence(ciphertext)
-    temp=list(avfreq)
-    if len(temp)==27:
-        temp.pop(26)
-    ranks=[]
-    for i in range (len(temp)):
-        maxi=temp.index(max(temp))
-        ranks.append(maxi)
-        temp[maxi]=-1
+    cipherRanks=rank_occurrence(ciphertext)
+    temp=list(probabilities)
+    averageRanks=rank_occurrence_of_list(probabilities)
     #now i need to find the key. the index in the key will be the ranks value and the value will be the cipher value
     key=[None] * 26
-    for i in range (26):
-        index=ranks[i]
-        key[index]=cipher[i]
+    for i in range (len(cipherRanks)):
+        index=averageRanks[i]
+        key[index]=cipherRanks[i]
     return key
 
 def substitute_singles(ciphertext,avfreq):
