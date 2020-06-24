@@ -237,4 +237,22 @@ def calc_liklihood_difference(l1,l2,plainPairCounts,probabilities,pairProbs):
     finalSum=rowSum+collumnSum-overlap
     return -1*finalSum
     
+def switch_two_indices(i1,i2,matrix):
+    #switch rows
+    rowl1=list(matrix[i1])
+    rowl2=list(matrix[i2])
+    matrix[i1]=rowl2
+    matrix[i2]=rowl1
+    #switch collumns
+    coll1=[]
+    coll2=[]
+    for j in range (len(matrix)):
+        newl1=int(matrix[j][i2])
+        newl2=int(matrix[j][i1])
+        matrix[j][i1]=newl1
+        matrix[j][i2]=newl2
         
+def switch_two_items(i1,i2,listy):
+    templetter=int(listy[i1])
+    listy[i1]=int(listy[i2])
+    listy[i2]=int(templetter)

@@ -18,6 +18,17 @@ def test_liklihood_difference():
     diff=log_liklihood_pairs(text, probabilitiesCrime, pairProbsCrime)-log_liklihood_pairs(text2, probabilitiesCrime, pairProbsCrime)
     assert math.isclose(diff,diffFun), "should be equal"
     
+def test_switch_indices():
+    matrix=[[1,2,3],[4,5,6],[7,8,9]]
+    switch_two_indices(0,1,matrix)
+    assert matrix==[[5,4,6],[2,1,3],[8,7,9]], "should be equal"
+    
+def test_switch_items(): 
+    listy=[1,2,3,4,5]
+    switch_two_items(0,1,listy)
+    assert listy==[2,1,3,4,5], "should be equal"
+    
 test_liklihood_difference()
-
+test_switch_indices()
+test_switch_items()
 print('test complete')
