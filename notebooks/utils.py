@@ -117,7 +117,7 @@ def get_pairs_array(ciphertext,pseudo=0):
     secondLetter=' '
     pair=firstLetter+secondLetter
     numPair = len(re.findall(pair, ciphertext))+pseudo
-    pairsList[i].append(numPair)
+    pairsList[26].append(numPair)
     return pairsList
 
 def calc_likelihood(ciphertext, key,probabilities):
@@ -215,8 +215,26 @@ def liklihood_pairs(plaintext,probabilities,pairProbs):
 def log_liklihood_pairs(plaintext,probabilities,pairProbs):
     dictpairs=list(pairProbs)
     numList=text_to_num(plaintext)
-    logsum=probabilities[numList[0]]
+    logsum=math.log(probabilities[numList[0]])
     for i in range (len(numList)-1):
         probs=dictpairs[numList[i]][numList[i+1]]
         logsum=logsum+math.log(probs)
     return(logsum) 
+
+def calc_liklihood_difference(l1,l2,plainPairCounts,probabilities,pairProbs):
+    rowSum=0
+    for i in range (len(pairProbs)):
+        logs=math.log(pairProbs[i][l1])-math.log(pairProbs[i][l2])
+        rowSum=rowSum+(plainPairCounts[i][l1]-plainPairCounts[i][l2])*logs
+    collumnSum=0
+    for j in range(len(pairProbs[0])):
+        logs=math.log(pairProbs[l1][j])-math.log(pairProbs[l2][j])
+        collumnSum=collumnSum+(plainPairCounts[l1][j]-plainPairCounts[l2][j])*logs
+    logs=math.log(pairProbs[l1][l1])-math.log(pairProbs[l2][l2])
+    overlap=(plainPairCounts[l1][l1]-plainPairCounts[l2][l2])*logs
+    logs=math.log(pairProbs[l1][l2])-math.log(pairProbs[l2][l1])
+    overlap=overlap+(plainPairCounts[l1][l2]-plainPairCounts[l2][l1])*logs
+    finalSum=rowSum+collumnSum-overlap
+    return -1*finalSum
+    
+        
