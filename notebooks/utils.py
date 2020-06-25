@@ -256,3 +256,24 @@ def switch_two_items(i1,i2,listy):
     templetter=int(listy[i1])
     listy[i1]=int(listy[i2])
     listy[i2]=int(templetter)
+    
+def climb_that_hill_fast(ciphertext,probabilities,pairProbs):
+    startKey=substitute_singles_key(ciphertext,probabilities)
+    i=0
+    plaintext=decode_arist(ciphertext,startKey)
+    plainPairCounts=get_pairs_array(plaintext)
+    while i<100000:
+        #get two random indices
+        l1=random.randint(0,25)
+        l2=random.randint(0,25)
+        while l2==l1:
+            l2=random.randint(0,25)
+        #calculate the difference in likelihood for a model after switching two letters from the original model 
+        diff=calc_liklihood_difference(l1,l2,plainPairCounts,probabilities,pairProbs)
+        #if difference is positive switch the two letters
+        if diff>0:
+            switch_two_items(l1,l2,startKey)
+            switch_two_indices(l1,l2,plainPairCounts)
+        else:
+            i+=1
+    return startKey
