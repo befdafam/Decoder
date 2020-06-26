@@ -221,20 +221,28 @@ def log_liklihood_pairs(plaintext,probabilities,pairProbs):
         logsum=logsum+math.log(probs)
     return(logsum) 
 
-def calc_liklihood_difference(l1,l2,plainPairCounts,probabilities,pairProbs):
+def calc_liklihood_difference(l1,l2,plainPairCounts,probabilities,pairProbs,firstl):
     rowSum=0
     for i in range (len(pairProbs)):
-        logs=math.log(pairProbs[i][l1])-math.log(pairProbs[i][l2])
-        rowSum=rowSum+(plainPairCounts[i][l1]-plainPairCounts[i][l2])*logs
+        if i!=l1 and i!=l2:
+            logs=math.log(pairProbs[i][l1])-math.log(pairProbs[i][l2])
+            rowSum=rowSum+(plainPairCounts[i][l1]-plainPairCounts[i][l2])*logs
     collumnSum=0
     for j in range(len(pairProbs[0])):
-        logs=math.log(pairProbs[l1][j])-math.log(pairProbs[l2][j])
-        collumnSum=collumnSum+(plainPairCounts[l1][j]-plainPairCounts[l2][j])*logs
+        if j!=l1 and j!=l2:
+            logs=math.log(pairProbs[l1][j])-math.log(pairProbs[l2][j])
+            collumnSum=collumnSum+(plainPairCounts[l1][j]-plainPairCounts[l2][j])*logs
     logs=math.log(pairProbs[l1][l1])-math.log(pairProbs[l2][l2])
     overlap=(plainPairCounts[l1][l1]-plainPairCounts[l2][l2])*logs
     logs=math.log(pairProbs[l1][l2])-math.log(pairProbs[l2][l1])
     overlap=overlap+(plainPairCounts[l1][l2]-plainPairCounts[l2][l1])*logs
-    finalSum=rowSum+collumnSum-overlap
+    #add difference in probability of first letter
+    firstProb=0
+    if firstl==l2:
+        firstProb=math.log(probabilities[l2])-math.log(probabilities[l1])
+    if firstl==l1:
+        firstProb=math.log(probabilities[l1])-math.log(probabilities[l2])
+    finalSum=rowSum+collumnSum+overlap+firstProb
     return -1*finalSum
     
 def switch_two_indices(i1,i2,matrix):
@@ -277,3 +285,47 @@ def climb_that_hill_fast(ciphertext,probabilities,pairProbs):
         else:
             i+=1
     return startKey
+
+def shift_key(number):
+    key=list(range(0, 26))
+    for i in range (number):
+        shifting=int(key[0])
+        key.pop(0)
+        key.append(shifting)
+    return key
+
+#encodes a given plaintext using a given vigenere key
+def encode_vigenere(text,key):
+    text=extract_characters(text)
+    listNum = text_to_num(text)
+    #make keynum list, find length and set index to 0
+    keyNum= text_to_num(key)
+    keyLen=len(keyNum)
+    ki=0
+    #find the shift for each letter
+    for i in range (len(listNum)):
+        shift=keyNum[ki]
+        currentKey=shift_key(shift)
+        if listNum[i] != 26:
+            listNum[i]= currentKey[listNum[i]]
+        ki+=1
+        if ki>keyLen-1:
+            ki=0
+    return num_to_text(listNum)
+
+def decode_vigenere(ciphertext,key):
+    listNum = text_to_num(ciphertext)
+    #make keynum list, find length and set index to 0
+    keyNum= text_to_num(key)
+    keyLen=len(keyNum)
+    ki=0
+    #find the shift for each letter
+    for i in range (len(listNum)):
+        shift=keyNum[ki]
+        currentKey=shift_key(shift)
+        if listNum[i] != 26:
+            listNum[i]= currentKey.index(listNum[i])
+        ki+=1
+        if ki>keyLen-1:
+            ki=0
+    return num_to_text(listNum)
